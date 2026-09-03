@@ -6,7 +6,7 @@ import Senator from "@/classes/Senator"
 import War from "@/classes/War"
 import WarStrength from "@/components/WarStrength"
 import { SERIES_NULLIFIERS } from "@/data/statesmen"
-import getDiceProbability from "@/helpers/dice"
+import { getCombatOdds } from "@/helpers/combatOdds"
 import { getEvilOmensLevel } from "@/helpers/gameEffects"
 import {
   compareWars,
@@ -165,24 +165,16 @@ const CombatCalculatorItem = ({
     ...enemyLeaders.map((l) => l.standoffNumber),
   ]
 
-  const ignoredNumbers = [
-    ...effectiveStandoffNumbers,
-    ...effectiveDisasterNumbers,
-  ]
-  const victoryProbability = Math.round(
-    getDiceProbability(3, modifier, { min: 14 }, ignoredNumbers) * 100,
-  )
-  const stalemateProbability = Math.round(
-    getDiceProbability(3, modifier, { min: 8, max: 13 }, ignoredNumbers) * 100,
-  )
-  const defeatProbability = Math.round(
-    getDiceProbability(3, modifier, { max: 7 }, ignoredNumbers) * 100,
-  )
-  const standoffProbability = Math.round(
-    getDiceProbability(3, 0, { exacts: effectiveStandoffNumbers }) * 100,
-  )
-  const disasterProbability = Math.round(
-    getDiceProbability(3, 0, { exacts: effectiveDisasterNumbers }) * 100,
+  const {
+    victory: victoryProbability,
+    stalemate: stalemateProbability,
+    defeat: defeatProbability,
+    standoff: standoffProbability,
+    disaster: disasterProbability,
+  } = getCombatOdds(
+    modifier,
+    effectiveDisasterNumbers,
+    effectiveStandoffNumbers,
   )
 
   const renderNumberField = (

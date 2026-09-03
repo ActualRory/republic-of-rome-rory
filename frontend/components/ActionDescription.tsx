@@ -39,6 +39,17 @@ const ActionDescription = ({ actionName, context }: ActionDescriptionProps) => {
       </p>
     )
   }
+  if (actionName === "Give battle") {
+    return (
+      <p>
+        Every commander sent against a war must attack it, but the commanders
+        decide the order in which they do so. Add your force strength to 3d6 and
+        subtract the strength of the war: 14 or more is a victory, 8 to 13 a
+        stalemate, and 7 or less a defeat, which kills the commander. The war's
+        own disaster and standoff numbers ignore this table entirely.
+      </p>
+    )
+  }
   if (actionName === "Contribute") {
     return (
       <>
@@ -232,8 +243,9 @@ const ActionDescription = ({ actionName, context }: ActionDescriptionProps) => {
   if (actionName === "Propose disbanding forces") {
     return (
       <p>
-        Disbanding a legion or fleet saves the State 2T per turn in maintenance. 
-        You may only disband reserve forces, and cannot disband forces raised this turn.
+        Disbanding a legion or fleet saves the State 2T per turn in maintenance.
+        You may only disband reserve forces, and cannot disband forces raised
+        this turn.
       </p>
     )
   }

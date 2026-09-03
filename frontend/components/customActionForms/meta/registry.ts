@@ -6,6 +6,7 @@ import AttemptAssassinationForm from "../AttemptAssassinationForm"
 import AttemptPersuasionForm from "../AttemptPersuasionForm"
 import ContinuePersuasionForm from "../ContinuePersuasionForm"
 import CounterBribeForm from "../CounterBribeForm"
+import GiveBattleForm from "../GiveBattleForm"
 import PlaySecretBodyguardForm from "../PlaySecretBodyguardForm"
 import PressureKnightsForm from "../PressureKnightsForm"
 import ProposeDeployingForcesForm from "../ProposeDeployingForcesForm"
@@ -21,6 +22,7 @@ export const customActionFormRegistry: Record<
   "Attempt persuasion": AttemptPersuasionForm,
   "Continue persuasion": ContinuePersuasionForm,
   "Counter-bribe": CounterBribeForm,
+  "Give battle": GiveBattleForm,
   "Play secret bodyguard": PlaySecretBodyguardForm,
   "Propose deploying forces": ProposeDeployingForcesForm,
   "Propose replacing proconsul": ProposeReplacingProconsulForm,
