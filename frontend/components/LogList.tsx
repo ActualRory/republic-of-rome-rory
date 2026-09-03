@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react"
 import { parseBattleRecord } from "@/classes/BattleRecord"
 import Log from "@/classes/Log"
 import PublicGameState from "@/classes/PublicGameState"
+import BattleLogEntry from "@/components/BattleLogEntry"
 import BattleOverlay from "@/components/BattleOverlay"
-import BattleReport from "@/components/BattleReport"
 import { formatElapsedDate } from "@/helpers/date"
 import useLogPlayback from "@/hooks/useLogPlayback"
 
@@ -46,8 +46,16 @@ const LogList = ({ publicGameState }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const isAtBottomRef = useRef(true)
 
-  const { visibleLogs, pendingCount, battle, skip, dismissBattle } =
-    useLogPlayback(publicGameState.logs)
+  const {
+    visibleLogs,
+    pendingCount,
+    isCatchingUp,
+    battle,
+    battleIsReplay,
+    skip,
+    showBattle,
+    dismissBattle,
+  } = useLogPlayback(publicGameState.logs, publicGameState.game?.id)
 
   useEffect(() => {
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
@@ -107,9 +115,10 @@ const LogList = ({ publicGameState }: Props) => {
                       {formatElapsedDate(log.createdOn, timezone)}
                     </div>
                     {record ? (
-                      <div className="w-full rounded border border-neutral-300 bg-neutral-50 p-3">
-                        <BattleReport record={record} />
-                      </div>
+                      <BattleLogEntry
+                        record={record}
+                        onOpen={() => showBattle(log)}
+                      />
                     ) : (
                       <div className="w-full">{log.text}</div>
                     )}
@@ -125,14 +134,24 @@ const LogList = ({ publicGameState }: Props) => {
         <button
           type="button"
           onClick={skip}
-          className="absolute bottom-4 right-10 select-none rounded-md border border-neutral-400 bg-white px-3 py-1 text-sm text-neutral-600 shadow-sm hover:bg-neutral-100"
+          title="Skip to what is happening now"
+          className="absolute bottom-4 right-10 flex select-none items-center gap-2 rounded-md border border-neutral-400 bg-white px-3 py-1 text-sm text-neutral-600 shadow-sm hover:bg-neutral-100"
         >
-          Skip {pendingCount}
+          {isCatchingUp && (
+            <span className="h-2 w-2 animate-pulse rounded-full bg-amber-500" />
+          )}
+          {isCatchingUp ? "Catching up" : `Skip ${pendingCount}`}
         </button>
       )}
 
       {battleRecord && (
-        <BattleOverlay record={battleRecord} onClose={dismissBattle} />
+        <BattleOverlay
+          record={battleRecord}
+          replay={battleIsReplay}
+          catchingUp={isCatchingUp}
+          onSkipToNow={skip}
+          onClose={dismissBattle}
+        />
       )}
     </div>
   )
