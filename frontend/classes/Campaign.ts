@@ -5,6 +5,8 @@ export interface CampaignData {
   master_of_horse: number | null
   war: number
   display_name: string
+  pending: boolean
+  imminent: boolean
 }
 
 class Campaign {
@@ -14,6 +16,8 @@ class Campaign {
   masterOfHorse: number | null
   war: number
   displayName: string
+  pending: boolean
+  imminent: boolean
 
   constructor(data: CampaignData) {
     this.id = data.id
@@ -22,6 +26,8 @@ class Campaign {
     this.masterOfHorse = data.master_of_horse
     this.war = data.war
     this.displayName = data.display_name
+    this.pending = data.pending ?? false
+    this.imminent = data.imminent ?? false
   }
 }
 

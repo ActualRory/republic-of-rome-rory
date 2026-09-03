@@ -2,16 +2,21 @@
 
 import { useEffect, useRef, useState } from "react"
 
+import AvailableAction from "@/classes/AvailableAction"
 import { parseBattleRecord } from "@/classes/BattleRecord"
 import Log from "@/classes/Log"
 import PublicGameState from "@/classes/PublicGameState"
 import BattleLogEntry from "@/components/BattleLogEntry"
 import BattleOverlay from "@/components/BattleOverlay"
+import PendingBattleOverlay from "@/components/PendingBattleOverlay"
 import { formatElapsedDate } from "@/helpers/date"
+import { getPendingBattle } from "@/helpers/pendingBattle"
 import useLogPlayback from "@/hooks/useLogPlayback"
 
 interface Props {
   publicGameState: PublicGameState
+  // The commander's own player is the only one who may order the attack
+  attackAction?: AvailableAction | null
 }
 
 interface LogGroup {
@@ -41,10 +46,15 @@ const groupLogs = (logs: Log[]): LogGroup[] => {
   return groups
 }
 
-const LogList = ({ publicGameState }: Props) => {
+const LogList = ({ publicGameState, attackAction = null }: Props) => {
   const [timezone, setTimezone] = useState<string>("")
   const scrollRef = useRef<HTMLDivElement>(null)
   const isAtBottomRef = useRef(true)
+
+  const pendingBattle = getPendingBattle(publicGameState)
+  const [dismissedBattle, setDismissedBattle] = useState<number | null>(null)
+  const watchingPendingBattle =
+    pendingBattle !== null && dismissedBattle !== pendingBattle.campaign.id
 
   const {
     visibleLogs,
@@ -117,6 +127,8 @@ const LogList = ({ publicGameState }: Props) => {
                     {record ? (
                       <BattleLogEntry
                         record={record}
+                        commander={record.commander}
+                        war={record.war}
                         onOpen={() => showBattle(log)}
                       />
                     ) : (
@@ -128,6 +140,21 @@ const LogList = ({ publicGameState }: Props) => {
             </div>
           </div>
         ))}
+
+        {/* A battle being fought has no log entry yet, but still belongs in the
+            log so anyone who closed the overlay can rejoin it */}
+        {pendingBattle && (
+          <div className="flex animate-log-entry flex-col items-baseline gap-x-4 pb-4">
+            <div className="flex w-full justify-end text-sm text-neutral-600">
+              Now
+            </div>
+            <BattleLogEntry
+              commander={pendingBattle.commander.displayName}
+              war={pendingBattle.war.name}
+              onOpen={() => setDismissedBattle(null)}
+            />
+          </div>
+        )}
       </div>
 
       {pendingCount > 0 && (
@@ -151,6 +178,18 @@ const LogList = ({ publicGameState }: Props) => {
           catchingUp={isCatchingUp}
           onSkipToNow={skip}
           onClose={dismissBattle}
+        />
+      )}
+
+      {/* The result takes precedence: once a battle has landed everyone watches
+          that rather than the wait that preceded it */}
+      {!battleRecord && pendingBattle && watchingPendingBattle && (
+        <PendingBattleOverlay
+          key={pendingBattle.campaign.id}
+          battle={pendingBattle}
+          publicGameState={publicGameState}
+          attackAction={attackAction}
+          onClose={() => setDismissedBattle(pendingBattle.campaign.id)}
         />
       )}
     </div>

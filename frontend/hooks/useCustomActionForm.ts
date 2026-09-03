@@ -5,7 +5,8 @@ import PublicGameState from "@/classes/PublicGameState"
 import getCSRFToken from "@/helpers/csrf"
 
 interface Options {
-  availableAction: AvailableAction
+  // Null when the viewer is watching an action only its owner may take
+  availableAction: AvailableAction | null
   publicGameState: PublicGameState
   isExpanded?: boolean
   setIsExpanded?: (expanded: boolean) => void
@@ -45,7 +46,7 @@ const useCustomActionForm = ({
   }, [isExpanded])
 
   const submit = async (payload: object): Promise<boolean> => {
-    if (!publicGameState.game) return false
+    if (!publicGameState.game || !availableAction) return false
     setLoading(true)
     const csrfToken = getCSRFToken()
     const response = await fetch(

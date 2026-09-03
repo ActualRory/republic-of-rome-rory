@@ -3,6 +3,7 @@
 import { BattleRecord } from "@/classes/BattleRecord"
 
 const RESULT_STYLES: Record<string, string> = {
+  underway: "border-neutral-500 text-neutral-700",
   victory: "border-emerald-600 text-emerald-700",
   stalemate: "border-neutral-500 text-neutral-700",
   defeat: "border-red-600 text-red-700",
@@ -11,28 +12,34 @@ const RESULT_STYLES: Record<string, string> = {
 }
 
 interface Props {
-  record: BattleRecord
+  // Absent while the battle is still being fought
+  record?: BattleRecord
+  commander: string
+  war: string
   onOpen: () => void
 }
 
-const BattleLogEntry = ({ record, onOpen }: Props) => (
-  <button
-    type="button"
-    onClick={onOpen}
-    className="group flex w-full items-baseline gap-2 rounded border border-transparent px-1 py-0.5 text-left hover:border-neutral-300 hover:bg-neutral-50"
-  >
-    <span
-      className={`shrink-0 rounded border px-1.5 text-xs font-semibold uppercase tracking-wide ${RESULT_STYLES[record.result]}`}
+const BattleLogEntry = ({ record, commander, war, onOpen }: Props) => {
+  const result = record?.result ?? "underway"
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group flex w-full items-baseline gap-2 rounded border border-transparent px-1 py-0.5 text-left hover:border-neutral-300 hover:bg-neutral-50"
     >
-      {record.result}
-    </span>
-    <span className="min-w-0">
-      {record.commander} against the {record.war}
-      <span className="ml-2 whitespace-nowrap text-sm text-neutral-500 group-hover:underline">
-        View battle
+      <span
+        className={`shrink-0 rounded border px-1.5 text-xs font-semibold uppercase tracking-wide ${RESULT_STYLES[result]}`}
+      >
+        {result}
       </span>
-    </span>
-  </button>
-)
+      <span className="min-w-0">
+        {commander} fought the {war}
+        <span className="ml-2 whitespace-nowrap text-sm text-neutral-500 group-hover:underline">
+          {record ? "View battle" : "Watch"}
+        </span>
+      </span>
+    </button>
+  )
+}
 
 export default BattleLogEntry

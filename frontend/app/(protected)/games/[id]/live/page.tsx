@@ -13,9 +13,7 @@ import ActionBar from "@/components/ActionBar"
 import CombatCalculator, {
   CombatCalculatorHandle,
 } from "@/components/CombatCalculator"
-import DebugPanel, {
-  DebugPanelHandle,
-} from "@/components/DebugPanel"
+import DebugPanel, { DebugPanelHandle } from "@/components/DebugPanel"
 import GameBar from "@/components/GameBar"
 import GameMain from "@/components/GameMain"
 import { ActionSelection } from "@/components/GenericActionForm"
@@ -455,7 +453,14 @@ const LiveGamePage = () => {
               />
             )}
           </div>
-          <LogList publicGameState={publicGameState as PublicGameState} />
+          <LogList
+            publicGameState={publicGameState as PublicGameState}
+            attackAction={
+              privateGameState?.availableActions.find(
+                (a) => a.base_name === "Give battle",
+              ) ?? null
+            }
+          />
         </div>
       </div>
     </>

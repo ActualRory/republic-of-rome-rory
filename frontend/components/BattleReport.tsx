@@ -62,7 +62,7 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
     <div className={`flex flex-col ${full ? "gap-5" : "gap-3"}`}>
       <div>
         <div className={full ? "text-xl" : "font-semibold"}>
-          {record.commander} against the {record.war}
+          {record.commander} fought the {record.war}
         </div>
         <div className="text-sm capitalize text-neutral-600">
           {record.battleType} battle

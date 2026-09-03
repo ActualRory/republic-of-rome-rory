@@ -13,4 +13,6 @@ class CampaignSerializer(serializers.ModelSerializer):
             "master_of_horse",
             "war",
             "display_name",
+            "pending",
+            "imminent",
         ]
