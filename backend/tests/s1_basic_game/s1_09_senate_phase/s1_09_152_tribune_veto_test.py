@@ -1,8 +1,9 @@
 import pytest
+from rorapp.actions.propose_disbanding_forces import ProposeDisbandingForcesAction
 from rorapp.actions.veto_with_tribune import VetoWithTribuneAction
 from rorapp.classes.faction_status_item import FactionStatusItem
 from rorapp.classes.random_resolver import FakeRandomResolver
-from rorapp.models import Faction, Game, Senator
+from rorapp.models import Faction, Game, Legion, Log, Senator
 
 
 @pytest.mark.django_db
@@ -325,3 +326,59 @@ def test_veto_with_free_tribune_removes_status_not_card(
     assert not free_tribune_senator.has_status_item(Senator.StatusItem.FREE_TRIBUNE)
     faction.refresh_from_db()
     assert "tribune" not in faction.cards
+
+
+@pytest.mark.django_db
+def test_dictator_proposal_log_says_it_cannot_be_vetoed(
+    senate_game: Game, resolver: FakeRandomResolver
+):
+    # Arrange
+    game = senate_game
+    legion = Legion.objects.create(game=game, number=1, recently_raised=False)
+    cornelius = Senator.objects.get(game=game, family_name="Cornelius")
+    cornelius.remove_title(Senator.Title.ROME_CONSUL)
+    cornelius.add_title(Senator.Title.DICTATOR)
+    cornelius.save()
+    assert cornelius.faction_id is not None
+
+    # Act
+    ProposeDisbandingForcesAction().execute(
+        game.id,
+        cornelius.faction_id,
+        {"Legions": [legion.id], "Fleets": []},
+        resolver,
+    )
+
+    # Assert
+    logs = Log.objects.filter(game=game)
+    assert any(
+        "Cornelius proposed the motion: Disband 1 legion (I). "
+        "The dictator's motion cannot be vetoed." in log.text
+        for log in logs
+    )
+
+
+@pytest.mark.django_db
+def test_consul_proposal_log_has_no_veto_note(
+    senate_game: Game, resolver: FakeRandomResolver
+):
+    # Arrange
+    game = senate_game
+    legion = Legion.objects.create(game=game, number=1, recently_raised=False)
+    cornelius = Senator.objects.get(game=game, family_name="Cornelius")
+    assert cornelius.faction_id is not None
+
+    # Act
+    ProposeDisbandingForcesAction().execute(
+        game.id,
+        cornelius.faction_id,
+        {"Legions": [legion.id], "Fleets": []},
+        resolver,
+    )
+
+    # Assert
+    logs = Log.objects.filter(game=game)
+    assert any(
+        log.text == "Cornelius proposed the motion: Disband 1 legion (I)."
+        for log in logs
+    )

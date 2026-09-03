@@ -103,6 +103,9 @@ def log_proposal(game_id: int, faction: Faction, game: Game, note: str = "") -> 
             for s in faction.senators.all()
             if s.has_title(Senator.Title.PRESIDING_MAGISTRATE)
         ][0]
+        # A dictator's motion cannot be vetoed (1.09.33)
+        if presiding_magistrate.has_title(Senator.Title.DICTATOR):
+            note += " The dictator's motion cannot be vetoed."
         Log.create_object(
             game_id,
             f"{presiding_magistrate.display_name} proposed the motion: {game.current_proposal}.{note}",

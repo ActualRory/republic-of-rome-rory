@@ -15,8 +15,9 @@ const ActionDescription = ({ actionName, context }: ActionDescriptionProps) => {
     return (
       <p>
         When Rome faces a military crisis, consuls may appoint a dictator, who
-        takes over as HRAO and presiding magistrate. The Dictator must appoint a
-        Master of Horse, and together they may be deployed to a single war.
+        takes over as HRAO and presiding magistrate. His motions cannot be
+        vetoed, but must still be voted on. The Dictator must appoint a Master
+        of Horse, and together they may be deployed to a single war.
       </p>
     )
   }
