@@ -9,6 +9,7 @@ MAJOR_OFFICES = [
     Senator.Title.FIELD_CONSUL,
     Senator.Title.PROCONSUL,
     Senator.Title.CENSOR,
+    Senator.Title.MASTER_OF_HORSE,
 ]
 
 
