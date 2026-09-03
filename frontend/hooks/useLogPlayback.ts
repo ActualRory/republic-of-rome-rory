@@ -23,24 +23,25 @@ const useLogPlayback = (logs: Log[]): Playback => {
   const [revealedId, setRevealedId] = useState<number | null>(null)
   const [battle, setBattle] = useState<Log | null>(null)
   const seenBattleIds = useRef<Set<number>>(new Set())
-  const initialised = useRef(false)
+  const baseline = useRef<number | null>(null)
 
   const ordered = [...logs].sort((a, b) => a.id - b.id)
   const latestId = ordered.length > 0 ? ordered[ordered.length - 1].id : null
 
-  // The first payload is the game's history, not news, so it is not played back
   const orderedRef = useRef<Log[]>(ordered)
   orderedRef.current = ordered
 
-  useEffect(() => {
-    if (initialised.current || latestId === null) return
-    initialised.current = true
-    setRevealedId(latestId)
-    orderedRef.current.forEach((log) => seenBattleIds.current.add(log.id))
-  }, [latestId])
+  // The log this component first renders is the game's history, not news, so it
+  // is never played back. A game with no history yet starts from zero
+  if (baseline.current === null) {
+    baseline.current = latestId ?? 0
+    ordered.forEach((log) => seenBattleIds.current.add(log.id))
+  }
 
-  const cutoff = revealedId ?? latestId ?? 0
-  const visibleLogs = ordered.filter((log) => log.id <= cutoff)
+  const cutoff = revealedId ?? baseline.current
+  const visibleLogs = ordered.filter(
+    (log) => log.id <= cutoff && log.id !== battle?.id,
+  )
   const pending = ordered.filter((log) => log.id > cutoff)
 
   const nextId = pending.length > 0 ? pending[0].id : null
@@ -48,7 +49,7 @@ const useLogPlayback = (logs: Log[]): Playback => {
   const tooManyPending = pending.length > MAX_PLAYBACK_ENTRIES
 
   useEffect(() => {
-    if (nextId === null) return
+    if (nextId === null || battle !== null) return
 
     if (tooManyPending) {
       setRevealedId(latestId)
@@ -58,7 +59,7 @@ const useLogPlayback = (logs: Log[]): Playback => {
     const delay = nextIsBattle ? BATTLE_INTERVAL_MS : ENTRY_INTERVAL_MS
     const timer = setTimeout(() => setRevealedId(nextId), delay)
     return () => clearTimeout(timer)
-  }, [nextId, nextIsBattle, tooManyPending, latestId])
+  }, [nextId, nextIsBattle, tooManyPending, latestId, battle])
 
   // A battle is the one entry that interrupts, and only while it is still news
   const visibleIds = visibleLogs.map((log) => log.id).join(",")

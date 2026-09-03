@@ -39,6 +39,8 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
       ? record.fleetsSurviving
       : record.legionsSurviving
 
+  const ignoresTable =
+    record.result === "disaster" || record.result === "standoff"
   const forceStrength = record.unitStrength + record.commanderStrength
 
   const row = (label: string, value: string, muted = false) => (
@@ -91,10 +93,16 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
               <Die key={i} value={face} size={full ? "lg" : "sm"} />
             ))}
           </div>
-          <div className={`tabular-nums ${full ? "text-lg" : "text-sm"}`}>
-            {record.roll} {signed(record.modifier)} ={" "}
-            <span className="font-semibold">{record.modifiedRoll}</span>
-          </div>
+          {ignoresTable ? (
+            <div className={`tabular-nums ${full ? "text-lg" : "text-sm"}`}>
+              <span className="font-semibold">{record.roll}</span>
+            </div>
+          ) : (
+            <div className={`tabular-nums ${full ? "text-lg" : "text-sm"}`}>
+              {record.roll} {signed(record.modifier)} ={" "}
+              <span className="font-semibold">{record.modifiedRoll}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -105,6 +113,12 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
           >
             {record.result}
           </div>
+          {ignoresTable && (
+            <span className="text-sm text-neutral-600">
+              {record.roll} is a {record.result} number, so the combat results
+              table was ignored
+            </span>
+          )}
           {record.warEnds && (
             <span className="text-sm text-neutral-600">
               The {record.war} is over

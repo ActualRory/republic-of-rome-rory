@@ -1,0 +1,46 @@
+{
+  "label": "Combat: battle",
+  "extends": "base",
+  "game": {
+    "phase": "combat",
+    "sub_phase": "start",
+    "unrest": 3
+  },
+  "senators": [
+    {
+      "family_name": "Fabius",
+      "code": "2",
+      "faction_position": 1,
+      "military": 4,
+      "oratory": 2,
+      "loyalty": 9,
+      "influence": 5,
+      "titles": ["FIELD_CONSUL"],
+      "location": "Cisalpine Gaul"
+    }
+  ],
+  "wars": [
+    {
+      "name": "1st Gallic War",
+      "series_name": "Gallic",
+      "index": 0,
+      "land_strength": 10,
+      "fleet_support": 0,
+      "naval_strength": 0,
+      "disaster_numbers": [13],
+      "standoff_numbers": [15],
+      "spoils": 20,
+      "famine": false,
+      "location": "Cisalpine Gaul",
+      "status": "active"
+    }
+  ],
+  "legions": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "campaigns": [
+    {
+      "commander": "2",
+      "war": "1st Gallic War",
+      "legions": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    }
+  ]
+}

@@ -55,7 +55,7 @@ The key models and their relationships:
 
 **`AvailableAction`** — Represents one action currently available to a player. Holds the `base_name` (maps to an action class), `field_descriptors` (JSON array that drives the frontend form), `context` (server-computed data stored server-side and echoed back on submission), and `position` (UI sort order). The full set is recomputed from scratch after every state change.
 
-**`Log`** — Append-only game log entries, tagged with `turn`, `phase`, and `text`.
+**`Log`** — Append-only game log entries, tagged with `turn`, `phase`, and `text`. An entry may also carry a `category` and a structured `data` payload, which the frontend renders instead of the plain text — battles use this to show the roll, the arithmetic behind it, and the casualties.
 
 **`CombatCalculation`** — Collaborative combat planning tool. Not part of game logic; synced across all connected clients via the game WebSocket.
 

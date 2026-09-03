@@ -8,7 +8,16 @@ from rorapp.classes.faction_status_item import FactionStatusItem
 from rorapp.effects.meta.effect_executor import execute_effects_and_manage_actions
 from rorapp.game_state.send_game_state import send_game_state
 from rorapp.helpers.provinces import province_static_fields
-from rorapp.models import Faction, Game, Legion, Province, Senator, War
+from rorapp.models import (
+    Campaign,
+    Faction,
+    Fleet,
+    Game,
+    Legion,
+    Province,
+    Senator,
+    War,
+)
 
 PRESETS_DIR = os.path.join(settings.BASE_DIR, "rorapp", "data", "presets")
 
@@ -88,6 +97,7 @@ def load_preset(game: Game, preset_data: dict) -> None:
             influence=s["influence"],
             knights=s.get("knights", 0),
             talents=s.get("talents", 0),
+            location=s.get("location", "Rome"),
         )
         for title_name in s.get("titles", []):
             senator.add_title(Senator.Title[title_name])
@@ -114,6 +124,22 @@ def load_preset(game: Game, preset_data: dict) -> None:
 
     for num in preset_data.get("legions", []):
         Legion.objects.create(game=game, number=num, recently_raised=False)
+
+    for num in preset_data.get("fleets", []):
+        Fleet.objects.create(game=game, number=num, recently_raised=False)
+
+    for c in preset_data.get("campaigns", []):
+        campaign = Campaign.objects.create(
+            game=game,
+            war=War.objects.get(game=game, name=c["war"]),
+            commander=Senator.objects.get(game=game, code=str(c["commander"])),
+        )
+        Legion.objects.filter(game=game, number__in=c.get("legions", [])).update(
+            campaign=campaign
+        )
+        Fleet.objects.filter(game=game, number__in=c.get("fleets", [])).update(
+            campaign=campaign
+        )
 
     for p in preset_data.get("provinces", []):
         Province.objects.create(
