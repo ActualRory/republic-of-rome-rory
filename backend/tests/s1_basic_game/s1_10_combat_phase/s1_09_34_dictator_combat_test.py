@@ -92,7 +92,10 @@ def dictator_victory_campaign(basic_game: Game):
 
 
 @pytest.mark.django_db
-def test_dictator_moh_military_combined_in_land_battle(dictator_land_campaign: Campaign):
+def test_dictator_moh_military_combined_in_land_battle(
+    dictator_land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = dictator_land_campaign.game
     dictator = dictator_land_campaign.commander
@@ -102,7 +105,7 @@ def test_dictator_moh_military_combined_in_land_battle(dictator_land_campaign: C
     resolver.dice_rolls = [10]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert — stalemate (not defeat), so dictator survives
     assert dictator is not None
@@ -112,7 +115,10 @@ def test_dictator_moh_military_combined_in_land_battle(dictator_land_campaign: C
 
 
 @pytest.mark.django_db
-def test_dictator_moh_military_combined_in_naval_battle(basic_game: Game):
+def test_dictator_moh_military_combined_in_naval_battle(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     # Valerius (mil=1) + Furius (mil=3) = combined 4
     # naval_strength=8, 3 fleets, roll=10:
@@ -152,7 +158,7 @@ def test_dictator_moh_military_combined_in_naval_battle(basic_game: Game):
     resolver.dice_rolls = [10]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert — stalemate (not defeat), so dictator survives
     assert Senator.objects.filter(id=dictator.id).exists()
@@ -161,7 +167,10 @@ def test_dictator_moh_military_combined_in_naval_battle(basic_game: Game):
 
 
 @pytest.mark.django_db
-def test_dictator_victory_dictator_gains_influence_and_popularity(dictator_victory_campaign: Campaign):
+def test_dictator_victory_dictator_gains_influence_and_popularity(
+    dictator_victory_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = dictator_victory_campaign.game
     dictator = dictator_victory_campaign.commander
@@ -172,7 +181,7 @@ def test_dictator_victory_dictator_gains_influence_and_popularity(dictator_victo
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert — glory = (6+1)//2 = 3
     dictator.refresh_from_db()
@@ -181,7 +190,10 @@ def test_dictator_victory_dictator_gains_influence_and_popularity(dictator_victo
 
 
 @pytest.mark.django_db
-def test_dictator_victory_moh_gets_nothing(dictator_victory_campaign: Campaign):
+def test_dictator_victory_moh_gets_nothing(
+    dictator_victory_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = dictator_victory_campaign.game
     moh = dictator_victory_campaign.master_of_horse
@@ -192,7 +204,7 @@ def test_dictator_victory_moh_gets_nothing(dictator_victory_campaign: Campaign):
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     moh.refresh_from_db()
@@ -201,7 +213,7 @@ def test_dictator_victory_moh_gets_nothing(dictator_victory_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_moh_killed_on_defeat(dictator_land_campaign: Campaign):
+def test_moh_killed_on_defeat(dictator_land_campaign: Campaign, fight_battles):
     # Arrange
     # Valerius (mil=1) + Furius (mil=3) combined=4, land_strength=10, 5 legions, roll=4:
     #   effective=min(4,5)=4, modifier=5+4-10=-1, modified=3  → defeat
@@ -217,7 +229,7 @@ def test_moh_killed_on_defeat(dictator_land_campaign: Campaign):
     resolver.dice_rolls = [4]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert — defeat kills both commander and MoH
     moh = Senator.objects.get(id=moh_id)
@@ -225,7 +237,10 @@ def test_moh_killed_on_defeat(dictator_land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_moh_survives_disaster_independently(dictator_land_campaign: Campaign):
+def test_moh_survives_disaster_independently(
+    dictator_land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     # Roll=13 → disaster; mortality chit "3" (Valerius) kills dictator; Furius (code "8") survives
     game = dictator_land_campaign.game
@@ -238,7 +253,7 @@ def test_moh_survives_disaster_independently(dictator_land_campaign: Campaign):
     resolver.mortality_chits = [["3"]]  # Valerius code — dictator dies, MoH survives
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     moh.refresh_from_db()
@@ -246,7 +261,10 @@ def test_moh_survives_disaster_independently(dictator_land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_dictator_killed_moh_returns_to_rome(dictator_land_campaign: Campaign):
+def test_dictator_killed_moh_returns_to_rome(
+    dictator_land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = dictator_land_campaign.game
     moh = dictator_land_campaign.master_of_horse
@@ -258,7 +276,7 @@ def test_dictator_killed_moh_returns_to_rome(dictator_land_campaign: Campaign):
     resolver.mortality_chits = [["3"]]  # Valerius code — dictator dies, MoH survives
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     moh.refresh_from_db()
@@ -266,7 +284,10 @@ def test_dictator_killed_moh_returns_to_rome(dictator_land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_dictator_killed_moh_keeps_title(dictator_land_campaign: Campaign):
+def test_dictator_killed_moh_keeps_title(
+    dictator_land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = dictator_land_campaign.game
     moh = dictator_land_campaign.master_of_horse
@@ -278,7 +299,7 @@ def test_dictator_killed_moh_keeps_title(dictator_land_campaign: Campaign):
     resolver.mortality_chits = [["3"]]  # Valerius code — dictator dies, MoH survives
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     moh.refresh_from_db()

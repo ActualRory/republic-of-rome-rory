@@ -26,7 +26,7 @@ def _upgrade_commander_to_statesman(campaign: Campaign, code: str, statesman_nam
 
 
 @pytest.mark.django_db
-def test_scipio_nullifies_punic_war_disaster(basic_game: Game):
+def test_scipio_nullifies_punic_war_disaster(basic_game: Game, fight_battles):
     # Arrange
     war = War.objects.create(
         game=basic_game,
@@ -50,14 +50,14 @@ def test_scipio_nullifies_punic_war_disaster(basic_game: Game):
     resolver.dice_rolls = [13]
 
     # Act
-    execute_effects_and_manage_actions(basic_game.id, resolver)
+    fight_battles(basic_game, resolver)
 
     # Assert
     assert Fleet.objects.filter(game=basic_game).count() == 10
 
 
 @pytest.mark.django_db
-def test_scipio_does_not_nullify_gallic_war_disaster(basic_game: Game):
+def test_scipio_does_not_nullify_gallic_war_disaster(basic_game: Game, fight_battles):
     # Arrange
     war = War.objects.create(
         game=basic_game,
@@ -81,14 +81,14 @@ def test_scipio_does_not_nullify_gallic_war_disaster(basic_game: Game):
     resolver.dice_rolls = [13]
 
     # Act
-    execute_effects_and_manage_actions(basic_game.id, resolver)
+    fight_battles(basic_game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=basic_game).count() == 5
 
 
 @pytest.mark.django_db
-def test_flamininus_nullifies_macedonian_war_disaster(basic_game: Game):
+def test_flamininus_nullifies_macedonian_war_disaster(basic_game: Game, fight_battles):
     # Arrange
     war = War.objects.create(
         game=basic_game,
@@ -112,14 +112,14 @@ def test_flamininus_nullifies_macedonian_war_disaster(basic_game: Game):
     resolver.dice_rolls = [13]
 
     # Act
-    execute_effects_and_manage_actions(basic_game.id, resolver)
+    fight_battles(basic_game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=basic_game).count() == 10
 
 
 @pytest.mark.django_db
-def test_fabius_halves_combat_losses(basic_game: Game):
+def test_fabius_halves_combat_losses(basic_game: Game, fight_battles):
     # Arrange
     war = War.objects.create(
         game=basic_game,
@@ -143,7 +143,7 @@ def test_fabius_halves_combat_losses(basic_game: Game):
     resolver.dice_rolls = [5]
 
     # Act
-    execute_effects_and_manage_actions(basic_game.id, resolver)
+    fight_battles(basic_game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=basic_game).count() == 8

@@ -6,7 +6,7 @@ from rorapp.effects.meta.effect_executor import execute_effects_and_manage_actio
 
 
 @pytest.mark.django_db
-def test_agreed_attacker_fights_first(two_campaigns):
+def test_agreed_attacker_fights_first(two_campaigns, fight_battles):
     # Arrange
     campaign1, campaign2 = two_campaigns
     game = campaign1.game
@@ -32,7 +32,7 @@ def test_agreed_attacker_fights_first(two_campaigns):
     resolver.dice_rolls = [18, 18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Campaign.objects.filter(game=game).exists() == False
@@ -43,7 +43,7 @@ def test_agreed_attacker_fights_first(two_campaigns):
 
 
 @pytest.mark.django_db
-def test_disputed_attack_order_resolved_by_dice(two_campaigns):
+def test_disputed_attack_order_resolved_by_dice(two_campaigns, fight_battles):
     # Arrange
     campaign1, campaign2 = two_campaigns
     game = campaign1.game
@@ -71,7 +71,7 @@ def test_disputed_attack_order_resolved_by_dice(two_campaigns):
     resolver.dice_rolls = [18, 18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Campaign.objects.filter(game=game).exists() == False

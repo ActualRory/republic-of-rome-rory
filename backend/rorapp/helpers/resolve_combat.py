@@ -45,7 +45,8 @@ def resolve_combat(
         return False
 
     # Determine dice roll and modifier
-    unmodified_result = random_resolver.roll_dice(3)
+    dice = random_resolver.roll_dice_faces(3)
+    unmodified_result = sum(dice)
     naval_battle = war.naval_strength > 0
     active_leaders = list(
         EnemyLeader.objects.filter(
@@ -248,6 +249,7 @@ def resolve_combat(
     game = Game.objects.get(id=game_id)
 
     # Update unrest
+    unrest_change = 0
     if result in ["defeat", "disaster"]:
         if result == "defeat":
             unrest_change = 2
@@ -268,7 +270,43 @@ def resolve_combat(
         game.state_treasury += war.spoils
         game.save()
 
-    Log.create_object(game_id=game_id, text=log_text)
+    battle_data = {
+        "commander": commander.display_name,
+        "master_of_horse": (
+            master_of_horse.display_name if master_of_horse else None
+        ),
+        "war": war.name,
+        "battle_type": "naval" if naval_battle else "land",
+        "dice": dice,
+        "roll": unmodified_result,
+        "unit_strength": positive_modifier - effective_commander_strength,
+        "unit_count": len(fleets) if naval_battle else len(legions),
+        "commander_military": combined_military,
+        "commander_strength": effective_commander_strength,
+        "war_strength": war.naval_strength if naval_battle else war.land_strength,
+        "matching_war_multiplier": matching_war_multiplier,
+        "leader_strength": leader_strength,
+        "evil_omens": evil_omens_level,
+        "modifier": modifier,
+        "modified_roll": modified_result,
+        "result": result,
+        "nullified": nullified,
+        "war_ends": war_ends,
+        "unrest_change": unrest_change,
+        "spoils": war.spoils if war_ends else 0,
+        "legions_lost": [l.name for l in destroyed_legions],
+        "fleets_lost": [f.name for f in destroyed_fleets],
+        "legions_surviving": [l.name for l in surviving_legions],
+        "fleets_surviving": [f.name for f in surviving_fleets],
+        "fabius_saved_legions": fabius_saved_legions,
+        "fabius_saved_fleets": fabius_saved_fleets,
+    }
+    battle_log = Log.create_object(
+        game_id=game_id,
+        text=log_text,
+        category=Log.Category.BATTLE,
+        data=battle_data,
+    )
 
     # Apply losses
     for fleet in destroyed_fleets:
@@ -278,6 +316,7 @@ def resolve_combat(
 
     # Kill commander
     commander_killed = master_of_horse_killed = False
+    codes: List[str] = []
     if result == "defeat":
         commander_killed = master_of_horse_killed = True
     else:
@@ -306,8 +345,9 @@ def resolve_combat(
 
     # Update commander stats
     commander_log_text = ""
+    glory_amount = 0
+    popularity_change = 0
     if not commander_killed:
-        glory_amount = 0
         popularity_loss = legion_losses // 2
         if result == "victory":
             glory_amount = (
@@ -332,6 +372,7 @@ def resolve_combat(
             Log.create_object(game_id=game_id, text=commander_log_text)
 
     # Promote a surviving legion to veteran status
+    promoted_legion_name = None
     if not naval_battle and result in ["victory", "stalemate", "standoff"]:
         promotable_legions = [l for l in surviving_legions if not l.veteran]
         promoted_legion = random_resolver.select_veteran(promotable_legions)
@@ -341,6 +382,7 @@ def resolve_combat(
             if not commander_killed:
                 promoted_legion.allegiance = commander
             promoted_legion.save()
+            promoted_legion_name = promoted_legion.name
             veteran_log_text = (
                 f"Legion {promoted_legion.name} hardened into a Veteran Legion"
             )
@@ -349,6 +391,19 @@ def resolve_combat(
             else:
                 veteran_log_text += f", owing allegiance to {commander.display_name}."
             Log.create_object(game_id=game_id, text=veteran_log_text)
+
+    battle_data.update(
+        {
+            "commander_killed": commander_killed,
+            "master_of_horse_killed": master_of_horse_killed,
+            "chits_drawn": codes,
+            "glory": glory_amount,
+            "popularity_change": popularity_change,
+            "veteran": promoted_legion_name,
+        }
+    )
+    battle_log.data = battle_data
+    battle_log.save(update_fields=["data"])
 
     # Handle end of war
     if war_ends:

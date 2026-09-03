@@ -41,14 +41,17 @@ def _create_second_punic_campaign(game: Game) -> Campaign:
 
 
 @pytest.mark.django_db
-def test_land_victory_awards_province_created_by_war(land_campaign: Campaign):
+def test_land_victory_awards_province_created_by_war(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
         Legion.objects.create(game=game, number=i, campaign=land_campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, _victory_resolver())
+    fight_battles(game, _victory_resolver())
 
     # Assert
     assert Province.objects.filter(game=game).count() == 1
@@ -60,7 +63,10 @@ def test_land_victory_awards_province_created_by_war(land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_second_punic_land_victory_awards_both_hispania_provinces(basic_game: Game):
+def test_second_punic_land_victory_awards_both_hispania_provinces(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -71,7 +77,7 @@ def test_second_punic_land_victory_awards_both_hispania_provinces(basic_game: Ga
         Legion.objects.create(game=game, number=i, campaign=campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, _victory_resolver())
+    fight_battles(game, _victory_resolver())
 
     # Assert
     assert {p.name for p in Province.objects.filter(game=game)} == {
@@ -81,7 +87,7 @@ def test_second_punic_land_victory_awards_both_hispania_provinces(basic_game: Ga
 
 
 @pytest.mark.django_db
-def test_naval_only_war_end_does_not_award_provinces(basic_game: Game):
+def test_naval_only_war_end_does_not_award_provinces(basic_game: Game, fight_battles):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -110,7 +116,7 @@ def test_naval_only_war_end_does_not_award_provinces(basic_game: Game):
         Fleet.objects.create(game=game, number=i, campaign=campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, _victory_resolver())
+    fight_battles(game, _victory_resolver())
 
     # Assert
     assert Province.objects.filter(game=game).count() == 0
@@ -118,14 +124,17 @@ def test_naval_only_war_end_does_not_award_provinces(basic_game: Game):
 
 
 @pytest.mark.django_db
-def test_naval_victory_alone_does_not_award_provinces(naval_campaign: Campaign):
+def test_naval_victory_alone_does_not_award_provinces(
+    naval_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = naval_campaign.game
     for i in range(1, 11):
         Fleet.objects.create(game=game, number=i, campaign=naval_campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, _victory_resolver())
+    fight_battles(game, _victory_resolver())
 
     # Assert
     assert Province.objects.filter(game=game).count() == 0
@@ -133,7 +142,10 @@ def test_naval_victory_alone_does_not_award_provinces(naval_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_full_punic_victory_awards_sicilia_and_sardinia(naval_campaign: Campaign):
+def test_full_punic_victory_awards_sicilia_and_sardinia(
+    naval_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = naval_campaign.game
     commander = naval_campaign.commander
@@ -146,7 +158,7 @@ def test_full_punic_victory_awards_sicilia_and_sardinia(naval_campaign: Campaign
     resolver.dice_rolls = [18, 18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
     faction = commander.faction
     assert faction is not None
     FightLandBattleAction().execute(game.id, faction.id, {}, resolver)
@@ -161,14 +173,14 @@ def test_full_punic_victory_awards_sicilia_and_sardinia(naval_campaign: Campaign
 
 
 @pytest.mark.django_db
-def test_stalemate_does_not_award_provinces(land_campaign: Campaign):
+def test_stalemate_does_not_award_provinces(land_campaign: Campaign, fight_battles):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
         Legion.objects.create(game=game, number=i, campaign=land_campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, _stalemate_resolver())
+    fight_battles(game, _stalemate_resolver())
 
     # Assert
     assert Province.objects.filter(game=game).count() == 0
@@ -176,7 +188,10 @@ def test_stalemate_does_not_award_provinces(land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_province_award_skips_provinces_already_in_play(basic_game: Game):
+def test_province_award_skips_provinces_already_in_play(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -190,7 +205,7 @@ def test_province_award_skips_provinces_already_in_play(basic_game: Game):
         Legion.objects.create(game=game, number=i, campaign=campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, _victory_resolver())
+    fight_battles(game, _victory_resolver())
 
     # Assert
     assert {p.name for p in Province.objects.filter(game=game)} == {

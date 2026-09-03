@@ -5,7 +5,10 @@ from rorapp.effects.meta.effect_executor import execute_effects_and_manage_actio
 
 
 @pytest.mark.django_db
-def test_land_victory_eliminates_war_and_reduces_unrest(land_campaign: Campaign):
+def test_land_victory_eliminates_war_and_reduces_unrest(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
@@ -14,7 +17,7 @@ def test_land_victory_eliminates_war_and_reduces_unrest(land_campaign: Campaign)
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     game.refresh_from_db()
@@ -23,7 +26,10 @@ def test_land_victory_eliminates_war_and_reduces_unrest(land_campaign: Campaign)
 
 
 @pytest.mark.django_db
-def test_land_victory_commander_gains_popularity(land_campaign: Campaign):
+def test_land_victory_commander_gains_popularity(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     commander = land_campaign.commander
@@ -34,7 +40,7 @@ def test_land_victory_commander_gains_popularity(land_campaign: Campaign):
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()
@@ -43,7 +49,7 @@ def test_land_victory_commander_gains_popularity(land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_naval_victory_reduces_unrest(naval_campaign: Campaign):
+def test_naval_victory_reduces_unrest(naval_campaign: Campaign, fight_battles):
     # Arrange
     game = naval_campaign.game
     for i in range(1, 11):
@@ -54,7 +60,7 @@ def test_naval_victory_reduces_unrest(naval_campaign: Campaign):
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     game.refresh_from_db()
@@ -62,7 +68,10 @@ def test_naval_victory_reduces_unrest(naval_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_naval_victory_fleet_only_commander_returns_to_rome(naval_campaign: Campaign):
+def test_naval_victory_fleet_only_commander_returns_to_rome(
+    naval_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = naval_campaign.game
     commander = naval_campaign.commander
@@ -73,7 +82,7 @@ def test_naval_victory_fleet_only_commander_returns_to_rome(naval_campaign: Camp
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()

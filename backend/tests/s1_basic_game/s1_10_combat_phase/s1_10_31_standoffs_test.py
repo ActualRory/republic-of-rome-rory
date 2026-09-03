@@ -5,7 +5,10 @@ from rorapp.effects.meta.effect_executor import execute_effects_and_manage_actio
 
 
 @pytest.mark.django_db
-def test_land_standoff_reduces_forces_and_keeps_campaign(land_campaign: Campaign):
+def test_land_standoff_reduces_forces_and_keeps_campaign(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
@@ -14,7 +17,7 @@ def test_land_standoff_reduces_forces_and_keeps_campaign(land_campaign: Campaign
     resolver.dice_rolls = [15]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game).count() == 7
@@ -24,7 +27,10 @@ def test_land_standoff_reduces_forces_and_keeps_campaign(land_campaign: Campaign
 
 
 @pytest.mark.django_db
-def test_naval_standoff_reduces_fleets_and_keeps_campaign(naval_campaign: Campaign):
+def test_naval_standoff_reduces_fleets_and_keeps_campaign(
+    naval_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = naval_campaign.game
     for i in range(1, 11):
@@ -33,7 +39,7 @@ def test_naval_standoff_reduces_fleets_and_keeps_campaign(naval_campaign: Campai
     resolver.dice_rolls = [11]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Fleet.objects.filter(game=game).count() == 7

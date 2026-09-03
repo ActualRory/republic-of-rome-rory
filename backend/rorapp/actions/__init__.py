@@ -1,6 +1,7 @@
 from .abstain import AbstainAction
 from .appoint_dictator import AppointDictatorAction
 from .fight_land_battle import FightLandBattleAction
+from .give_battle import GiveBattleAction
 from .halt_after_naval_victory import HaltAfterNavalVictoryAction
 from .attract_knight import AttractKnightAction
 from .pressure_knight import PressureKnightAction

@@ -7,6 +7,7 @@ from rorapp.effects.meta.effect_executor import execute_effects_and_manage_actio
 @pytest.mark.django_db
 def test_land_victory_creates_one_veteran_owing_allegiance_to_commander(
     land_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange
     game = land_campaign.game
@@ -18,7 +19,7 @@ def test_land_victory_creates_one_veteran_owing_allegiance_to_commander(
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     veteran = Legion.objects.get(game=game, veteran=True)
@@ -26,7 +27,7 @@ def test_land_victory_creates_one_veteran_owing_allegiance_to_commander(
 
 
 @pytest.mark.django_db
-def test_land_stalemate_creates_veteran(land_campaign: Campaign):
+def test_land_stalemate_creates_veteran(land_campaign: Campaign, fight_battles):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
@@ -35,14 +36,14 @@ def test_land_stalemate_creates_veteran(land_campaign: Campaign):
     resolver.dice_rolls = [5]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game, veteran=True).count() == 1
 
 
 @pytest.mark.django_db
-def test_land_standoff_creates_veteran(land_campaign: Campaign):
+def test_land_standoff_creates_veteran(land_campaign: Campaign, fight_battles):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
@@ -51,14 +52,14 @@ def test_land_standoff_creates_veteran(land_campaign: Campaign):
     resolver.dice_rolls = [15]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game, veteran=True).count() == 1
 
 
 @pytest.mark.django_db
-def test_land_disaster_creates_no_veteran(land_campaign: Campaign):
+def test_land_disaster_creates_no_veteran(land_campaign: Campaign, fight_battles):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
@@ -67,14 +68,14 @@ def test_land_disaster_creates_no_veteran(land_campaign: Campaign):
     resolver.dice_rolls = [13]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game, veteran=True).exists() == False
 
 
 @pytest.mark.django_db
-def test_land_defeat_creates_no_veteran(land_campaign: Campaign):
+def test_land_defeat_creates_no_veteran(land_campaign: Campaign, fight_battles):
     # Arrange
     game = land_campaign.game
     for i in range(1, 7):
@@ -83,7 +84,7 @@ def test_land_defeat_creates_no_veteran(land_campaign: Campaign):
     resolver.dice_rolls = [4]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game).count() == 2
@@ -91,7 +92,7 @@ def test_land_defeat_creates_no_veteran(land_campaign: Campaign):
 
 
 @pytest.mark.django_db
-def test_naval_victory_creates_no_veteran(naval_campaign: Campaign):
+def test_naval_victory_creates_no_veteran(naval_campaign: Campaign, fight_battles):
     # Arrange
     game = naval_campaign.game
     for i in range(1, 11):
@@ -102,14 +103,17 @@ def test_naval_victory_creates_no_veteran(naval_campaign: Campaign):
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game, veteran=True).exists() == False
 
 
 @pytest.mark.django_db
-def test_only_a_non_veteran_survivor_is_promoted(land_campaign: Campaign):
+def test_only_a_non_veteran_survivor_is_promoted(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     Legion.objects.create(game=game, number=1, campaign=land_campaign, veteran=True)
@@ -119,7 +123,7 @@ def test_only_a_non_veteran_survivor_is_promoted(land_campaign: Campaign):
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game, veteran=True).count() == 2
@@ -130,6 +134,7 @@ def test_only_a_non_veteran_survivor_is_promoted(land_campaign: Campaign):
 @pytest.mark.django_db
 def test_no_veteran_is_created_when_every_survivor_is_already_a_veteran(
     land_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange
     game = land_campaign.game
@@ -139,7 +144,7 @@ def test_no_veteran_is_created_when_every_survivor_is_already_a_veteran(
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game, veteran=True).count() == 10
@@ -147,7 +152,10 @@ def test_no_veteran_is_created_when_every_survivor_is_already_a_veteran(
 
 
 @pytest.mark.django_db
-def test_promoted_legion_follows_the_resolver_selection(land_campaign: Campaign):
+def test_promoted_legion_follows_the_resolver_selection(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     for i in range(1, 11):
@@ -157,7 +165,7 @@ def test_promoted_legion_follows_the_resolver_selection(land_campaign: Campaign)
     resolver.veteran_order = ["5"]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.get(game=game, veteran=True).number == 5
@@ -166,6 +174,7 @@ def test_promoted_legion_follows_the_resolver_selection(land_campaign: Campaign)
 @pytest.mark.django_db
 def test_veteran_created_by_a_dead_commander_owes_allegiance_to_nobody(
     land_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange
     game = land_campaign.game
@@ -178,7 +187,7 @@ def test_veteran_created_by_a_dead_commander_owes_allegiance_to_nobody(
     resolver.mortality_chits = [["1"]]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()
@@ -188,7 +197,10 @@ def test_veteran_created_by_a_dead_commander_owes_allegiance_to_nobody(
 
 
 @pytest.mark.django_db
-def test_allegiance_is_released_when_the_owning_senator_dies(land_campaign: Campaign):
+def test_allegiance_is_released_when_the_owning_senator_dies(
+    land_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = land_campaign.game
     commander = land_campaign.commander
@@ -204,7 +216,7 @@ def test_allegiance_is_released_when_the_owning_senator_dies(land_campaign: Camp
     resolver.dice_rolls = [4]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     reserve_veteran.refresh_from_db()

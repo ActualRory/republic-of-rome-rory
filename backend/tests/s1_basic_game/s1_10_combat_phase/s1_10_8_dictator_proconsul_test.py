@@ -40,13 +40,17 @@ def _setup_dictator_on_campaign(game: Game) -> tuple:
 
 
 @pytest.mark.django_db
-def test_dictator_loses_dictator_title_becomes_proconsul(basic_game: Game, resolver: FakeRandomResolver):
+def test_dictator_loses_dictator_title_becomes_proconsul(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     dictator, moh, campaign = _setup_dictator_on_campaign(game)
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     dictator.refresh_from_db()
@@ -56,13 +60,17 @@ def test_dictator_loses_dictator_title_becomes_proconsul(basic_game: Game, resol
 
 
 @pytest.mark.django_db
-def test_moh_returns_to_rome_when_dictator_becomes_proconsul(basic_game: Game, resolver: FakeRandomResolver):
+def test_moh_returns_to_rome_when_dictator_becomes_proconsul(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     dictator, moh, campaign = _setup_dictator_on_campaign(game)
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     moh.refresh_from_db()
@@ -70,13 +78,17 @@ def test_moh_returns_to_rome_when_dictator_becomes_proconsul(basic_game: Game, r
 
 
 @pytest.mark.django_db
-def test_moh_keeps_title_when_dictator_becomes_proconsul(basic_game: Game, resolver: FakeRandomResolver):
+def test_moh_keeps_title_when_dictator_becomes_proconsul(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     dictator, moh, campaign = _setup_dictator_on_campaign(game)
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     moh.refresh_from_db()
@@ -84,13 +96,17 @@ def test_moh_keeps_title_when_dictator_becomes_proconsul(basic_game: Game, resol
 
 
 @pytest.mark.django_db
-def test_campaign_moh_cleared_when_dictator_becomes_proconsul(basic_game: Game, resolver: FakeRandomResolver):
+def test_campaign_moh_cleared_when_dictator_becomes_proconsul(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     dictator, moh, campaign = _setup_dictator_on_campaign(game)
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     campaign.refresh_from_db()
@@ -98,11 +114,15 @@ def test_campaign_moh_cleared_when_dictator_becomes_proconsul(basic_game: Game, 
 
 
 @pytest.mark.django_db
-def test_moh_title_cleared_at_consular_elections_after_proconsul(basic_game: Game, resolver: FakeRandomResolver):
+def test_moh_title_cleared_at_consular_elections_after_proconsul(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     dictator, moh, campaign = _setup_dictator_on_campaign(game)
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
     moh.refresh_from_db()
     assert moh.has_title(Senator.Title.MASTER_OF_HORSE)  # still has it after combat phase end
     cornelius = Senator.objects.get(game=game, family_name="Cornelius")

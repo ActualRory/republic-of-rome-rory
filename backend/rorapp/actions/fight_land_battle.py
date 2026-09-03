@@ -4,6 +4,7 @@ from rorapp.actions.meta.execution_result import ExecutionResult
 from rorapp.classes.random_resolver import RandomResolver
 from rorapp.game_state.game_state_live import GameStateLive
 from rorapp.game_state.game_state_snapshot import GameStateSnapshot
+from rorapp.helpers.resolve_combat import resolve_combat
 from rorapp.models import AvailableAction, Campaign, Faction, Game, Log, Senator
 
 
@@ -62,16 +63,15 @@ class FightLandBattleAction(ActionBase):
                 senator.remove_status_item(Senator.StatusItem.CONSIDERING_LAND_BATTLE)
                 senator.save()
 
-                campaign = Campaign.objects.filter(
-                    game=game_id, commander=senator
-                ).first()
-                if campaign:
-                    campaign.pending = True
-                    campaign.save()
-
                 Log.create_object(
                     game_id,
                     f"{senator.display_name} pressed the attack against the land forces.",
                 )
+
+                campaign = Campaign.objects.filter(
+                    game=game_id, commander=senator
+                ).first()
+                if campaign:
+                    resolve_combat(game_id, campaign.id, random_resolver)
 
         return ExecutionResult(True)

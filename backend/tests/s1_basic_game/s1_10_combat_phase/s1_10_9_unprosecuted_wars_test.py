@@ -5,7 +5,11 @@ from rorapp.effects.meta.effect_executor import execute_effects_and_manage_actio
 
 
 @pytest.mark.django_db
-def test_naval_victory_with_all_fleets_lost_not_unprosecuted(basic_game: Game, resolver: FakeRandomResolver):
+def test_naval_victory_with_all_fleets_lost_not_unprosecuted(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -29,7 +33,7 @@ def test_naval_victory_with_all_fleets_lost_not_unprosecuted(basic_game: Game, r
     )
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     war.refresh_from_db()
@@ -37,7 +41,11 @@ def test_naval_victory_with_all_fleets_lost_not_unprosecuted(basic_game: Game, r
 
 
 @pytest.mark.django_db
-def test_land_battle_with_insufficient_fleet_support_is_unprosecuted(basic_game: Game, resolver: FakeRandomResolver):
+def test_land_battle_with_insufficient_fleet_support_is_unprosecuted(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -66,7 +74,7 @@ def test_land_battle_with_insufficient_fleet_support_is_unprosecuted(basic_game:
     Fleet.objects.create(game=game, number=1, campaign=campaign)  # 1 fleet, below fleet_support=2
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     war.refresh_from_db()
@@ -74,7 +82,11 @@ def test_land_battle_with_insufficient_fleet_support_is_unprosecuted(basic_game:
 
 
 @pytest.mark.django_db
-def test_land_battle_with_sufficient_fleet_support_not_unprosecuted(basic_game: Game, resolver: FakeRandomResolver):
+def test_land_battle_with_sufficient_fleet_support_not_unprosecuted(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -104,7 +116,7 @@ def test_land_battle_with_sufficient_fleet_support_not_unprosecuted(basic_game: 
     Fleet.objects.create(game=game, number=2, campaign=campaign)  # 2 fleets meet fleet_support=2
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     war.refresh_from_db()
@@ -112,7 +124,11 @@ def test_land_battle_with_sufficient_fleet_support_not_unprosecuted(basic_game: 
 
 
 @pytest.mark.django_db
-def test_prosecuted_war_clears_unprosecuted_flag(basic_game: Game, resolver: FakeRandomResolver):
+def test_prosecuted_war_clears_unprosecuted_flag(
+    basic_game: Game,
+    resolver: FakeRandomResolver,
+    fight_battles,
+):
     # Arrange
     game = basic_game
     game.phase = Game.Phase.COMBAT
@@ -141,7 +157,7 @@ def test_prosecuted_war_clears_unprosecuted_flag(basic_game: Game, resolver: Fak
     Legion.objects.create(game=game, number=1, campaign=campaign)
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     war.refresh_from_db()

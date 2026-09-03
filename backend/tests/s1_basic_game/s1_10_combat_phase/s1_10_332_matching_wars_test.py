@@ -95,7 +95,7 @@ def _setup_naval_campaign(basic_game: Game, extra_matching_war: bool) -> Campaig
 
 
 @pytest.mark.django_db
-def test_single_active_war_uses_base_land_strength(basic_game: Game):
+def test_single_active_war_uses_base_land_strength(basic_game: Game, fight_battles):
     # Arrange
     campaign = _setup_land_campaign(basic_game, extra_matching_war=False)
     game = campaign.game
@@ -105,14 +105,14 @@ def test_single_active_war_uses_base_land_strength(basic_game: Game):
     resolver.dice_rolls = [3]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert not War.objects.filter(game=game, series_name="Gallic").exists()
 
 
 @pytest.mark.django_db
-def test_two_matching_active_wars_double_land_strength(basic_game: Game):
+def test_two_matching_active_wars_double_land_strength(basic_game: Game, fight_battles):
     # Arrange
     campaign = _setup_land_campaign(basic_game, extra_matching_war=True)
     game = campaign.game
@@ -122,14 +122,14 @@ def test_two_matching_active_wars_double_land_strength(basic_game: Game):
     resolver.dice_rolls = [3]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert War.objects.filter(game=game, name="1st Gallic War").exists()
 
 
 @pytest.mark.django_db
-def test_single_active_war_uses_base_naval_strength(basic_game: Game):
+def test_single_active_war_uses_base_naval_strength(basic_game: Game, fight_battles):
     # Arrange
     campaign = _setup_naval_campaign(basic_game, extra_matching_war=False)
     game = campaign.game
@@ -141,7 +141,7 @@ def test_single_active_war_uses_base_naval_strength(basic_game: Game):
     resolver.dice_rolls = [3]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert War.objects.filter(
@@ -150,7 +150,10 @@ def test_single_active_war_uses_base_naval_strength(basic_game: Game):
 
 
 @pytest.mark.django_db
-def test_two_matching_active_wars_double_naval_strength(basic_game: Game):
+def test_two_matching_active_wars_double_naval_strength(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_naval_campaign(basic_game, extra_matching_war=True)
     game = campaign.game
@@ -162,7 +165,7 @@ def test_two_matching_active_wars_double_naval_strength(basic_game: Game):
     resolver.dice_rolls = [3]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert War.objects.filter(

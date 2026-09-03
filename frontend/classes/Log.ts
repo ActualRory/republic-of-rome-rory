@@ -4,6 +4,8 @@ export interface LogData {
   phase: string
   created_on: string
   text: string
+  category: string
+  data: Record<string, unknown>
 }
 
 class Log {
@@ -12,6 +14,8 @@ class Log {
   phase: string
   createdOn: string
   text: string
+  category: string
+  data: Record<string, unknown>
 
   constructor(data: LogData) {
     this.id = data.id
@@ -19,6 +23,8 @@ class Log {
     this.phase = data.phase
     this.createdOn = data.created_on
     this.text = data.text
+    this.category = data.category ?? ""
+    this.data = data.data ?? {}
   }
 }
 

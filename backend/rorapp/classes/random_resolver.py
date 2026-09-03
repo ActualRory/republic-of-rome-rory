@@ -22,6 +22,16 @@ class RandomResolver(ABC):
         pass
 
     @abstractmethod
+    def roll_dice_faces(self, count: int = 1) -> List[int]:
+        """
+        Roll 1d6 a given number of times, keeping the individual faces.
+
+        Returns:
+            One value per die, always totalling the same as roll_dice
+        """
+        pass
+
+    @abstractmethod
     def select_casualties(
         self, units: Sequence[Union[Legion, Fleet]], count: int
     ) -> Tuple[List, List]:
@@ -70,10 +80,10 @@ class RealRandomResolver(RandomResolver):
     """
 
     def roll_dice(self, count: int = 1) -> int:
-        total = 0
-        for _ in range(count):
-            total += random.randint(1, 6)
-        return total
+        return sum(self.roll_dice_faces(count))
+
+    def roll_dice_faces(self, count: int = 1) -> List[int]:
+        return [random.randint(1, 6) for _ in range(count)]
 
     def select_casualties(
         self, units: Sequence[Union[Legion, Fleet]], losses: int
@@ -149,6 +159,9 @@ class FakeRandomResolver(RandomResolver):
             raise ValueError("Dice roll not set in FakeRandomResolver.")
         return self.dice_rolls.pop(0)
 
+    def roll_dice_faces(self, count: int = 1) -> List[int]:
+        return _split_into_faces(self.roll_dice(count), count)
+
     def select_casualties(
         self, units: Sequence[Union[Legion, Fleet]], losses: int
     ) -> Tuple[List, List]:
@@ -203,3 +216,18 @@ class FakeRandomResolver(RandomResolver):
         self.naval_casualty_order = []
         self.veteran_order = []
         self.mortality_chits = []
+
+
+def _split_into_faces(total: int, count: int) -> List[int]:
+    # A queued total that no combination of dice could produce is reported as one
+    # face, so the sum still matches what the rest of the engine was given
+    if count < 1 or not count <= total <= count * 6:
+        return [total]
+
+    faces = [1] * count
+    remainder = total - count
+    for index in range(count):
+        added = min(5, remainder)
+        faces[index] += added
+        remainder -= added
+    return faces

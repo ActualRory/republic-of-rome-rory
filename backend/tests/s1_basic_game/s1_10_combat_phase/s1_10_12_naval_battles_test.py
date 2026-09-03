@@ -9,6 +9,7 @@ from rorapp.models import Campaign, Fleet, Game, Legion, Log, Senator, War
 @pytest.mark.django_db
 def test_naval_victory_with_legions_and_fleet_support_pauses_for_land_battle_decision(
     naval_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange
     game = naval_campaign.game
@@ -22,7 +23,7 @@ def test_naval_victory_with_legions_and_fleet_support_pauses_for_land_battle_dec
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()
@@ -34,6 +35,7 @@ def test_naval_victory_with_legions_and_fleet_support_pauses_for_land_battle_dec
 @pytest.mark.django_db
 def test_attacking_land_forces_after_naval_victory_eliminates_war(
     naval_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange
     game = naval_campaign.game
@@ -47,7 +49,7 @@ def test_attacking_land_forces_after_naval_victory_eliminates_war(
     resolver.dice_rolls = [18, 18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
     faction = commander.faction
     assert faction is not None
     action = FightLandBattleAction()
@@ -59,7 +61,10 @@ def test_attacking_land_forces_after_naval_victory_eliminates_war(
 
 
 @pytest.mark.django_db
-def test_halting_after_naval_victory_leaves_war_intact(naval_campaign: Campaign):
+def test_halting_after_naval_victory_leaves_war_intact(
+    naval_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = naval_campaign.game
     commander = naval_campaign.commander
@@ -72,7 +77,7 @@ def test_halting_after_naval_victory_leaves_war_intact(naval_campaign: Campaign)
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
     faction = commander.faction
     assert faction is not None
     action = HaltAfterNavalVictoryAction()
@@ -89,6 +94,7 @@ def test_halting_after_naval_victory_leaves_war_intact(naval_campaign: Campaign)
 @pytest.mark.django_db
 def test_naval_victory_without_surviving_fleet_support_does_not_offer_land_battle(
     naval_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange — only 3 fleets against naval_strength=10; all fleets lost on a narrow victory
     game = naval_campaign.game
@@ -102,7 +108,7 @@ def test_naval_victory_without_surviving_fleet_support_does_not_offer_land_battl
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()
@@ -112,6 +118,7 @@ def test_naval_victory_without_surviving_fleet_support_does_not_offer_land_battl
 @pytest.mark.django_db
 def test_naval_victory_by_fleet_only_force_returns_fleets_to_the_reserve(
     naval_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange — a fleet-only force, so there are no legions left to fight on
     game = naval_campaign.game
@@ -123,7 +130,7 @@ def test_naval_victory_by_fleet_only_force_returns_fleets_to_the_reserve(
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()
@@ -136,7 +143,10 @@ def test_naval_victory_by_fleet_only_force_returns_fleets_to_the_reserve(
 
 
 @pytest.mark.django_db
-def test_naval_victory_by_fleet_only_force_logs_the_return(naval_campaign: Campaign):
+def test_naval_victory_by_fleet_only_force_logs_the_return(
+    naval_campaign: Campaign,
+    fight_battles,
+):
     # Arrange
     game = naval_campaign.game
     commander = naval_campaign.commander
@@ -147,7 +157,7 @@ def test_naval_victory_by_fleet_only_force_logs_the_return(naval_campaign: Campa
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     log_texts = list(Log.objects.filter(game=game).values_list("text", flat=True))
@@ -161,6 +171,7 @@ def test_naval_victory_by_fleet_only_force_logs_the_return(naval_campaign: Campa
 @pytest.mark.django_db
 def test_naval_victory_that_destroys_every_fleet_still_logs_the_return(
     naval_campaign: Campaign,
+    fight_battles,
 ):
     # Arrange — only 3 fleets against naval_strength=10, so a narrow victory
     # destroys all of them and there is nothing to return to the reserve
@@ -173,7 +184,7 @@ def test_naval_victory_that_destroys_every_fleet_still_logs_the_return(
     resolver.dice_rolls = [18]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     commander.refresh_from_db()

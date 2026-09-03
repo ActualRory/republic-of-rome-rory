@@ -9,6 +9,7 @@ action_registry: Dict[str, Type[ActionBase]] = {
     AcceptProsecutorRoleAction.NAME: AcceptProsecutorRoleAction,
     AcceptRiskyCommandAction.NAME: AcceptRiskyCommandAction,
     FightLandBattleAction.NAME: FightLandBattleAction,
+    GiveBattleAction.NAME: GiveBattleAction,
     GiveSpeechAction.NAME: GiveSpeechAction,
     AttractKnightAction.NAME: AttractKnightAction,
     PressureKnightAction.NAME: PressureKnightAction,

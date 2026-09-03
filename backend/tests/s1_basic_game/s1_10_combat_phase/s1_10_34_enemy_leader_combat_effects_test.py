@@ -39,7 +39,10 @@ def _setup_land_campaign(
 
 
 @pytest.mark.django_db
-def test_active_leader_strength_adds_to_war_negative_modifier(basic_game: Game):
+def test_active_leader_strength_adds_to_war_negative_modifier(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_land_campaign(
         basic_game, series_name="TestSeries", land_strength=2
@@ -60,14 +63,17 @@ def test_active_leader_strength_adds_to_war_negative_modifier(basic_game: Game):
     resolver.dice_rolls = [3]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert War.objects.filter(game=game, name="Test War").exists()
 
 
 @pytest.mark.django_db
-def test_active_leader_disaster_number_triggers_automatic_disaster(basic_game: Game):
+def test_active_leader_disaster_number_triggers_automatic_disaster(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_land_campaign(
         basic_game, series_name="TestSeries", land_strength=20
@@ -88,14 +94,17 @@ def test_active_leader_disaster_number_triggers_automatic_disaster(basic_game: G
     resolver.dice_rolls = [7]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game).count() == 5  # (10 + 1) // 2 = 5 losses
 
 
 @pytest.mark.django_db
-def test_active_leader_standoff_number_triggers_automatic_standoff(basic_game: Game):
+def test_active_leader_standoff_number_triggers_automatic_standoff(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_land_campaign(
         basic_game, series_name="TestSeries", land_strength=20
@@ -116,14 +125,17 @@ def test_active_leader_standoff_number_triggers_automatic_standoff(basic_game: G
     resolver.dice_rolls = [7]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert Legion.objects.filter(game=game).count() == 7  # (10 + 3) // 4 = 3 losses
 
 
 @pytest.mark.django_db
-def test_leader_disaster_is_independent_of_war_disaster(basic_game: Game):
+def test_leader_disaster_is_independent_of_war_disaster(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_land_campaign(
         basic_game, series_name="TestSeries", land_strength=20, disaster_numbers=[10]
@@ -144,7 +156,7 @@ def test_leader_disaster_is_independent_of_war_disaster(basic_game: Game):
     resolver.dice_rolls = [9]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     assert (
@@ -153,7 +165,10 @@ def test_leader_disaster_is_independent_of_war_disaster(basic_game: Game):
 
 
 @pytest.mark.django_db
-def test_leader_deactivates_when_last_matching_war_is_defeated(basic_game: Game):
+def test_leader_deactivates_when_last_matching_war_is_defeated(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_land_campaign(
         basic_game, series_name="TestSeries", land_strength=3
@@ -174,7 +189,7 @@ def test_leader_deactivates_when_last_matching_war_is_defeated(basic_game: Game)
     resolver.dice_rolls = [3]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     leader.refresh_from_db()
@@ -182,7 +197,10 @@ def test_leader_deactivates_when_last_matching_war_is_defeated(basic_game: Game)
 
 
 @pytest.mark.django_db
-def test_leader_stays_active_when_other_matching_war_still_exists(basic_game: Game):
+def test_leader_stays_active_when_other_matching_war_still_exists(
+    basic_game: Game,
+    fight_battles,
+):
     # Arrange
     campaign = _setup_land_campaign(
         basic_game, series_name="TestSeries", land_strength=3
@@ -217,7 +235,7 @@ def test_leader_stays_active_when_other_matching_war_still_exists(basic_game: Ga
     resolver.dice_rolls = [6]
 
     # Act
-    execute_effects_and_manage_actions(game.id, resolver)
+    fight_battles(game, resolver)
 
     # Assert
     leader.refresh_from_db()

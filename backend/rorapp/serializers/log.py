@@ -6,4 +6,13 @@ from rorapp.models import Log
 class LogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Log
-        fields = ["id", "game", "turn", "phase", "created_on", "text"]
+        fields = [
+            "id",
+            "game",
+            "turn",
+            "phase",
+            "created_on",
+            "text",
+            "category",
+            "data",
+        ]
