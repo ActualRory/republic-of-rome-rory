@@ -94,6 +94,23 @@ def resolve_combat(
     roll_would_be_disaster = war.is_active_disaster(unmodified_result)
     roll_would_be_standoff = war.is_active_standoff(unmodified_result)
 
+    # The numbers that could still have triggered on this roll, captured before
+    # this battle spends one of them (1.10.21)
+    available_disaster_numbers = sorted(
+        set(
+            ([] if nullified else list(war.disaster_numbers))
+            + [l.disaster_number for l in active_leaders]
+        )
+        - set(war.spent_disaster_numbers)
+    )
+    available_standoff_numbers = sorted(
+        set(
+            ([] if nullified else list(war.standoff_numbers))
+            + [l.standoff_number for l in active_leaders]
+        )
+        - set(war.spent_standoff_numbers)
+    )
+
     # Determine result
     result = None
     if not nullified and war.is_active_disaster(unmodified_result):
@@ -291,6 +308,8 @@ def resolve_combat(
         "modified_roll": modified_result,
         "result": result,
         "nullified": nullified,
+        "disaster_numbers": available_disaster_numbers,
+        "standoff_numbers": available_standoff_numbers,
         "war_ends": war_ends,
         "unrest_change": unrest_change,
         "spoils": war.spoils if war_ends else 0,

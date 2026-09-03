@@ -33,6 +33,8 @@ def test_battle_record_holds_the_roll_and_the_arithmetic(
     assert data["modifier"] == 4
     assert data["modified_roll"] == 16
     assert data["result"] == "victory"
+    assert data["disaster_numbers"] == [13]
+    assert data["standoff_numbers"] == [15]
 
 
 @pytest.mark.django_db

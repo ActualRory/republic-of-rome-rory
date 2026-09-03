@@ -24,6 +24,8 @@ export interface BattleRecord {
   modifiedRoll: number
   result: BattleResult
   nullified: boolean
+  disasterNumbers: number[]
+  standoffNumbers: number[]
   warEnds: boolean
   unrestChange: number
   spoils: number
@@ -94,6 +96,8 @@ export function parseBattleRecord(
     modifiedRoll: num(data, "modified_roll"),
     result: result as BattleResult,
     nullified: data["nullified"] === true,
+    disasterNumbers: numbers(data, "disaster_numbers"),
+    standoffNumbers: numbers(data, "standoff_numbers"),
     warEnds: data["war_ends"] === true,
     unrestChange: num(data, "unrest_change"),
     spoils: num(data, "spoils"),

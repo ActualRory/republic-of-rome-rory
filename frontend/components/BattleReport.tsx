@@ -2,6 +2,7 @@
 
 import { BattleRecord, BattleResult } from "@/classes/BattleRecord"
 import Die from "@/components/Die"
+import { getCombatOdds } from "@/helpers/combatOdds"
 
 const RESULT_STYLES: Record<BattleResult, string> = {
   victory: "border-emerald-600 bg-emerald-50 text-emerald-700",
@@ -42,6 +43,11 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
   const ignoresTable =
     record.result === "disaster" || record.result === "standoff"
   const forceStrength = record.unitStrength + record.commanderStrength
+  const odds = getCombatOdds(
+    record.modifier,
+    record.disasterNumbers,
+    record.standoffNumbers,
+  )[record.result]
 
   const row = (label: string, value: string, muted = false) => (
     <div
@@ -113,6 +119,7 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
           >
             {record.result}
           </div>
+          <span className="text-sm text-neutral-600">{odds}% chance</span>
           {ignoresTable && (
             <span className="text-sm text-neutral-600">
               {record.roll} is a {record.result} number, so the combat results
@@ -163,45 +170,46 @@ const BattleReport = ({ record, beat, size = "compact" }: Props) => {
         </div>
       )}
 
-      {visible(5) && (
-        <div className="flex animate-battle-beat flex-col gap-1 text-sm">
-          {record.commanderKilled && (
-            <div className="font-semibold text-red-700">
-              {record.commander} was killed
-            </div>
-          )}
-          {record.masterOfHorseKilled && record.masterOfHorse && (
-            <div className="font-semibold text-red-700">
-              {record.masterOfHorse} was killed
-            </div>
-          )}
-          {record.glory > 0 && (
-            <div className="text-neutral-600">
-              Military glory: {signed(record.glory)} influence
-            </div>
-          )}
-          {record.popularityChange !== 0 && (
-            <div className="text-neutral-600">
-              Popularity {signed(record.popularityChange)}
-            </div>
-          )}
-          {record.veteran && (
-            <div className="text-neutral-600">
-              Legion {record.veteran} hardened into a Veteran Legion
-            </div>
-          )}
-          {record.spoils > 0 && (
-            <div className="text-neutral-600">
-              Spoils of war: {record.spoils}T to the State Treasury
-            </div>
-          )}
-          {record.unrestChange !== 0 && (
-            <div className="text-neutral-600">
-              Unrest {signed(record.unrestChange)}
-            </div>
-          )}
-        </div>
-      )}
+      {visible(5) &&
+        (full || record.spoils > 0 || record.unrestChange !== 0) && (
+          <div className="flex animate-battle-beat flex-col gap-1 text-sm">
+            {full && record.commanderKilled && (
+              <div className="font-semibold text-red-700">
+                {record.commander} was killed
+              </div>
+            )}
+            {full && record.masterOfHorseKilled && record.masterOfHorse && (
+              <div className="font-semibold text-red-700">
+                {record.masterOfHorse} was killed
+              </div>
+            )}
+            {full && record.glory > 0 && (
+              <div className="text-neutral-600">
+                Military glory: {signed(record.glory)} influence
+              </div>
+            )}
+            {full && record.popularityChange !== 0 && (
+              <div className="text-neutral-600">
+                Popularity {signed(record.popularityChange)}
+              </div>
+            )}
+            {full && record.veteran && (
+              <div className="text-neutral-600">
+                Legion {record.veteran} hardened into a Veteran Legion
+              </div>
+            )}
+            {record.spoils > 0 && (
+              <div className="text-neutral-600">
+                Spoils of war: {record.spoils}T to the State Treasury
+              </div>
+            )}
+            {record.unrestChange !== 0 && (
+              <div className="text-neutral-600">
+                Unrest {signed(record.unrestChange)}
+              </div>
+            )}
+          </div>
+        )}
     </div>
   )
 }
