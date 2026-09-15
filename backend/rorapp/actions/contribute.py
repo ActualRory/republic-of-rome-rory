@@ -27,6 +27,7 @@ class ContributeAction(ActionBase):
                 and s.faction.id == faction.id
                 and s.alive
                 and not s.rebel
+                and not s.captive
                 and not s.has_status_item(Senator.StatusItem.CONTRIBUTED)
             )
             > 0
@@ -48,6 +49,7 @@ class ContributeAction(ActionBase):
                     and s.faction.id == faction.id
                     and s.alive
                     and not s.rebel
+                    and not s.captive
                     and s.talents > 0
                     and not s.has_status_item(Senator.StatusItem.CONTRIBUTED)
                 ],
@@ -99,6 +101,7 @@ class ContributeAction(ActionBase):
         if (
             talents > senator.talents
             or senator.rebel
+            or senator.captive
             or senator.has_status_item(Senator.StatusItem.CONTRIBUTED)
         ):
             return ExecutionResult(False)

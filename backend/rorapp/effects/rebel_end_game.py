@@ -132,8 +132,11 @@ def _outcome(game_id: int):
     campaign = rebel_campaign(game_id)
     wars = active_wars_against_rome(game_id)
 
-    # A war that survived the rebel's attack ends his run (1.12.3)
+    # A war that survived the rebel's attack ends his run (1.12.3), including
+    # one that took him captive (1.10.71)
     if campaign and not campaign.land_victory and not campaign.war.primary_rebel_id:
+        return "lost"
+    if rebel and rebel.captive:
         return "lost"
 
     if rebel and rebel.alive:

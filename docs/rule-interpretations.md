@@ -71,6 +71,12 @@ The implementation reads the Censor the same way. A Censor outside Rome neither 
 
 ## Combat phase
 
+### A ransomed rebel rejoins the revolt instead of returning to Rome (rule 1.10.71)
+
+§1.10.71 says "Captives always return to Rome when Ransomed", and §1.11.32 says senators who join a revolt "leave Rome". A captive may still declare for the revolt, so a captive rebel can be ransomed, and the two rules point him in opposite directions.
+
+The implementation keeps him with the revolt. A rebel in Rome would be counted for the HRAO and could attend the senate he is marching on.
+
 ## Revolution phase
 
 ### A Primary Rebel who loses his army survives, and still blocks other revolts (rule 1.11.372)

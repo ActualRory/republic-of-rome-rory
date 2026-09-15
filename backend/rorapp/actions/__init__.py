@@ -20,6 +20,7 @@ from .pay_rebel_maintenance import PayRebelMaintenanceAction
 from .pay_for_released_forces import PayForReleasedForcesAction
 from .refuse_released_forces import RefuseReleasedForcesAction
 from .attack_war import AttackWarAction
+from .pay_ransom import PayRansomAction
 from .accept_land_bill_sponsorship import AcceptLandBillSponsorshipAction
 from .accept_prosecutor_role import AcceptProsecutorRoleAction
 from .accept_risky_command import AcceptRiskyCommandAction

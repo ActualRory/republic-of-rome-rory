@@ -35,8 +35,11 @@ def rebel_paymasters(game_id: int) -> List[Senator]:
     if not war or not war.primary_rebel:
         return []
     primary_rebel = war.primary_rebel
+    # A captive's treasury is frozen except to pay his ransom (1.10.71)
     others = (
-        Senator.objects.filter(game=game_id, rebel=True, alive=True)
+        Senator.objects.filter(
+            game=game_id, rebel=True, alive=True, captor__isnull=True
+        )
         .exclude(id=primary_rebel.id)
         .order_by("id")
     )

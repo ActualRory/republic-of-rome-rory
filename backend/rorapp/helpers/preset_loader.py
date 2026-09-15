@@ -136,6 +136,9 @@ def load_preset(game: Game, preset_data: dict) -> None:
                 game=game, code=str(w["primary_rebel_code"])
             )
         war.save()
+        Senator.objects.filter(
+            game=game, code__in=[str(c) for c in w.get("captive_codes", [])]
+        ).update(captor=war, location=war.location)
 
     for l in preset_data.get("enemy_leaders", []):
         EnemyLeader.objects.create(

@@ -95,7 +95,11 @@ class RevenueEffect(EffectBase):
         factions = Faction.objects.filter(game=game_id).order_by("position")
         for faction in factions:
             senators = Senator.objects.filter(
-                game=game_id, faction=faction, alive=True, rebel=False
+                game=game_id,
+                faction=faction,
+                alive=True,
+                rebel=False,
+                captor__isnull=True,
             )
             revenue = 0
             for senator in senators:

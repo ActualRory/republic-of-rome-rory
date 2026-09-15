@@ -81,6 +81,30 @@ def test_the_rebel_wins_by_beating_a_war_back_below_four(
 
 
 @pytest.mark.django_db
+def test_everyone_loses_when_the_rebel_is_captured(
+    rebel_army: Callable[..., Campaign], resolver: FakeRandomResolver
+):
+    # Arrange
+    campaign = rebel_army(legion_numbers=list(range(1, 16)), other_wars=4)
+    game = campaign.game
+    execute_effects_and_manage_actions(game.id, resolver)
+    rebel = Senator.objects.get(game=game, family_name="Cornelius")
+    war = War.objects.filter(game=game, primary_rebel__isnull=True).first()
+    assert war is not None
+    resolver.dice_rolls = [3]
+    resolver.mortality_chits = [["none", rebel.code]]
+
+    # Act
+    _attack(game, war, resolver)
+
+    # Assert
+    game.refresh_from_db()
+    rebel.refresh_from_db()
+    assert rebel.captor_id == war.id
+    assert game.finished_on is not None
+
+
+@pytest.mark.django_db
 def test_everyone_loses_when_the_rebel_fails_to_win_a_battle(
     rebel_army: Callable[..., Campaign], resolver: FakeRandomResolver
 ):

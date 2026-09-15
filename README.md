@@ -141,7 +141,7 @@ The checklist below tracks implementation of the **early republic scenario** —
   - [x] Veteran legions
   - [x] Commander continues attack
   - [ ] New province
-  - [ ] Capture
+  - [x] Capture
   - [x] Civil war battle
   - [x] Rebel attacks war
   - [x] Rebel wins game

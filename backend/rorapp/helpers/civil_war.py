@@ -317,7 +317,9 @@ def apply_rebel_markers(senator: Senator) -> None:
     senator.clear_titles()
     if was_faction_leader:
         senator.add_title(Senator.Title.FACTION_LEADER)
-    senator.location = CIVIL_WAR_LOCATION
+    # A captive stays with the War holding him (1.10.71)
+    if not senator.captive:
+        senator.location = CIVIL_WAR_LOCATION
     senator.save()
 
 
