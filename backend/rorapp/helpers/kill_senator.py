@@ -190,4 +190,4 @@ def kill_senator(
 
     # A revolt fails when its Primary Rebel dies, however he dies (1.11.372)
     if revolt:
-        fail_revolt(revolt, display_name)
+        fail_revolt(revolt, f"The revolt ended with the death of {display_name}.")
